@@ -9,11 +9,11 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="min-h-screen grid grid-cols-2">
-    <div class="w-full h-full p-3">
+  <div class="min-h-screen grid xl:grid-cols-2">
+    <div class="hidden xl:block w-full h-full p-10">
       <div class="bg-stone-800 w-full h-full rounded-[50px]"></div>
     </div>
-    <div class="p-10">
+    <div class="p-10 max-w-2xl w-full mx-auto">
       <h1 class="text-6xl">Bino</h1>
       <div class="mt-32">
         <h2 class="text-4xl font-semibold">Register</h2>
