@@ -4,6 +4,7 @@ import LoginPage from '@/views/pages/LoginPage.vue'
 import RegisterPage from '@/views/pages/RegisterPage.vue'
 import ChatPage from '@/views/pages/ChatPage.vue'
 import MainLayout from '@/views/layouts/MainLayout.vue'
+import SettingPage from '@/views/pages/SettingPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -12,8 +13,9 @@ const router = createRouter({
     { path: '/login', component: LoginPage },
     { path: '/register', component: RegisterPage },
     {
-      path: '/chat/:id', component: MainLayout, children: [
-        { path: '', component: ChatPage }
+      path: '/', component: MainLayout, children: [
+        { path: 'chat/:id', component: ChatPage },
+        { path: '/setting', component: SettingPage }
       ]
     }
   ]

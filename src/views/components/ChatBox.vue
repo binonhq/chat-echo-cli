@@ -8,96 +8,96 @@ export default defineComponent({
   components: { Input, Message },
   setup() {
     const messageDataFake = [
-      {
-        id: 1,
-        message: 'Hello, how are you?',
-        isMe: false
-      },
-      {
-        id: 2,
-        message: 'I am fine, thank you.',
-        isMe: true
-      },
-      {
-        id: 3,
-        message: 'What are you doing?',
-        isMe: false
-      },
-      {
-        id: 4,
-        message: 'I am working on my project.',
-        isMe: true
-      },
-      {
-        id: 5,
-        message: 'That is great!',
-        isMe: false
-      },
-      {
-        id: 6,
-        message: 'Yes, it is.',
-        isMe: true
-      },
-      {
-        id: 7,
-        message: 'Hello, how are you?',
-        isMe: false
-      },
-      {
-        id: 8,
-        message: 'I am fine, thank you.',
-        isMe: true
-      },
-      {
-        id: 9,
-        message: 'What are you doing?',
-        isMe: false
-      },
-      {
-        id: 10,
-        message: 'I am working on my project.',
-        isMe: true
-      },
-      {
-        id: 11,
-        message: 'That is great!',
-        isMe: false
-      },
-      {
-        id: 12,
-        message: 'Yes, it is.',
-        isMe: true
-      },
-      {
-        id: 13,
-        message: 'Hello, how are you?',
-        isMe: false
-      },
-      {
-        id: 14,
-        message: 'I am fine, thank you.',
-        isMe: true
-      },
-      {
-        id: 15,
-        message: 'What are you doing?',
-        isMe: false
-      },
-      {
-        id: 16,
-        message: 'I am working on my project.',
-        isMe: true
-      },
-      {
-        id: 17,
-        message: 'That is great!',
-        isMe: false
-      },
-      {
-        id: 18,
-        message: 'Yes, it is.',
-        isMe: true
-      },
+      // {
+      //   id: 1,
+      //   message: 'Hello, how are you?',
+      //   isMe: false
+      // },
+      // {
+      //   id: 2,
+      //   message: 'I am fine, thank you.',
+      //   isMe: true
+      // },
+      // {
+      //   id: 3,
+      //   message: 'What are you doing?',
+      //   isMe: false
+      // },
+      // {
+      //   id: 4,
+      //   message: 'I am working on my project.',
+      //   isMe: true
+      // },
+      // {
+      //   id: 5,
+      //   message: 'That is great!',
+      //   isMe: false
+      // },
+      // {
+      //   id: 6,
+      //   message: 'Yes, it is.',
+      //   isMe: true
+      // },
+      // {
+      //   id: 7,
+      //   message: 'Hello, how are you?',
+      //   isMe: false
+      // },
+      // {
+      //   id: 8,
+      //   message: 'I am fine, thank you.',
+      //   isMe: true
+      // },
+      // {
+      //   id: 9,
+      //   message: 'What are you doing?',
+      //   isMe: false
+      // },
+      // {
+      //   id: 10,
+      //   message: 'I am working on my project.',
+      //   isMe: true
+      // },
+      // {
+      //   id: 11,
+      //   message: 'That is great!',
+      //   isMe: false
+      // },
+      // {
+      //   id: 12,
+      //   message: 'Yes, it is.',
+      //   isMe: true
+      // },
+      // {
+      //   id: 13,
+      //   message: 'Hello, how are you?',
+      //   isMe: false
+      // },
+      // {
+      //   id: 14,
+      //   message: 'I am fine, thank you.',
+      //   isMe: true
+      // },
+      // {
+      //   id: 15,
+      //   message: 'Hello! Nice to meetyou',
+      //   isMe: false
+      // },
+      // {
+      //   id: 16,
+      //   message: 'I am working on my project.',
+      //   isMe: true
+      // },
+      // {
+      //   id: 17,
+      //   message: 'That is great!',
+      //   isMe: false
+      // },
+      // {
+      //   id: 18,
+      //   message: 'Yes, it is.',
+      //   isMe: true
+      // },
       {
         id: 19,
         message: 'Hello, how are you?',
@@ -161,13 +161,13 @@ export default defineComponent({
       <h2 class="text-sm font-light text-gray-500">Chat with</h2>
       <h2 class="font-semibold text-xl">Bino</h2>
     </div>
-    <div class="flex flex-col space-y-2 w-full overflow-y-scroll">
+    <div class="flex flex-col space-y-2 w-full overflow-y-scroll mt-auto">
       <Message v-for="message in messageDataFake" :key="message.id" :message="message" class="max-w-1/2" />
     </div>
     <div v-if="isHasFileAttached">
       <Input type="file" />
     </div>
-    <div class="flex w-full gap-4 mt-auto">
+    <div class="flex w-full gap-4">
       <Input id="message" class="w-full" placeholder="Type a message ..." type="text" />
       <Button :class="{'bg-stone-300' : isShowStickerBox}" variant="secondary" @click="toggleStickerBox">
         =))
@@ -181,7 +181,9 @@ export default defineComponent({
             stroke-linejoin="round" />
         </svg>
       </Button>
-      <Button class="w-36">Send</Button>
+      <Button class="w-36">
+        Send
+      </Button>
     </div>
     <div v-if="isShowStickerBox" class="h-[500px] flex flex-col border-t border-gray-100">
       <div class="grow flex gap-5 mt-3">

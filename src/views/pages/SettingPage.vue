@@ -1,16 +1,15 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Toaster } from '@/components/ui/toast'
 
 export default defineComponent({
-  name: 'App',
-  components: { Toaster }
+  name: 'SettingPage'
 })
 </script>
 
 <template>
-  <Toaster />
-  <RouterView />
+  <div>
+    Setting Page
+  </div>
 </template>
 
 <style scoped>

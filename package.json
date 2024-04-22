@@ -9,15 +9,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vee-validate/zod": "^4.12.6",
     "@vueuse/core": "^10.9.0",
+    "axios": "^1.6.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "lucide-vue-next": "^0.372.0",
     "radix-vue": "^1.6.2",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
+    "vee-validate": "^4.12.6",
     "vue": "^3.4.21",
     "vue-router": "4",
-    "vuex": "^4.1.0"
+    "vuex": "^4.1.0",
+    "zod": "^3.23.0"
   },
   "lint-staged": {
     "*.{js,vue}": [
