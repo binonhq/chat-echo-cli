@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { type HTMLAttributes, computed } from 'vue'
+<script lang="ts" setup>
+import { computed, type HTMLAttributes } from 'vue'
 import { Label, type LabelProps } from 'radix-vue'
 import { cn } from '@/utils'
 
@@ -14,13 +14,13 @@ const delegatedProps = computed(() => {
 
 <template>
   <Label
-    v-bind="delegatedProps"
     :class="
       cn(
         'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
         props.class,
       )
     "
+    v-bind="delegatedProps"
   >
     <slot />
   </Label>

@@ -22,10 +22,10 @@ export default defineComponent({
 </script>
 
 <template>
-  <router-link class="flex gap-2 items-center" to="/">
+  <div class="flex items-center gap-2">
     <img :class=logoProps alt="Logo" src="@/assets/images/logo.png">
     <h2 v-if="showName" :class="['font-bold text-primary', textProps]">ChatEcho</h2>
-  </router-link>
+  </div>
 </template>
 
 <style scoped>

@@ -1,33 +1,36 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { Icon } from '@iconify/vue'
 
 export default defineComponent({
-  name: 'ChatInformation'
+  name: 'ChatInformation',
+  components: { Icon },
+  setup(props, { emit }) {
+    const toggleHideChatInformation = () => {
+      emit('toggle-show-chat-information', false)
+    }
+    return {
+      toggleHideChatInformation
+    }
+  }
 })
 </script>
 
 <template>
   <div
-    class="flex flex-col items-center w-[400px] p-10 gap-4 h-screen border-l-[1px] border-gray-300">
-    <div class="flex justify-between w-full items-center">
+    class="flex h-screen flex-col items-center gap-4 border-gray-300 p-5 w-[400px] border-l-[1px]">
+    <div class="flex w-full items-center justify-between">
       <h1 class="font-semibold">Information</h1>
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
-           xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
-          stroke-linecap="round"
-          stroke-linejoin="round" />
-      </svg>
+      <div @click="toggleHideChatInformation">
+        <Icon class="size-5 text-primary cursor-pointer" icon="lucide:x" />
+      </div>
     </div>
-    <div class="w-32 h-32 relative mt-10">
-      <img
-        alt="avatar"
-        class="rounded-full"
-        src="https://minimomonimi.com/cdn/shop/products/simple-avatar-minimomonimi-cartoonish-minimalist-01.png?v=1664979841">
-      <div class="absolute w-4 h-4 rounded-full bg-amber-300 right-[16px] bottom-[7px]"></div>
-    </div>
-    <p class="font-semibold text-center text-2xl">Phan Hoai Thuong</p>
-    <div class="flex gap-3 justify-center">
+    <Avatar
+      image="https://minimomonimi.com/cdn/shop/products/simple-avatar-minimomonimi-cartoonish-minimalist-01.png?v=1664979841"
+      online
+    />
+    <p class="text-center text-2xl font-semibold">Phan Hoai Thuong</p>
+    <div class="flex justify-center gap-3">
       <svg style="fill:#3d3939;" viewBox="0,0,256,256" width="25" x="0px"
            xmlns="http://www.w3.org/2000/svg"
            y="0px">
@@ -66,12 +69,12 @@ export default defineComponent({
       </svg>
     </div>
     <Separator class="w-full" />
-    <div class="flex justify-between w-full ">
+    <div class="flex w-full justify-between">
       <h2 class="font-semibold">Shared files</h2>
       <h2 class="text-sm text-blue-500">See all</h2>
     </div>
-    <div class="flex flex-col gap-4 overflow-y-scroll w-full">
-      <div v-for="i in [1,2,3,4,5]" :key="i" class="flex items-center gap-4 w-full justify-start">
+    <div class="flex w-full flex-col gap-4 overflow-y-scroll">
+      <div v-for="i in [1,2,3,4,5]" :key="i" class="flex w-full items-center justify-start gap-4">
         <img
           alt="test"
           class="size-20 rounded-[10px]"
@@ -80,20 +83,20 @@ export default defineComponent({
       </div>
     </div>
     <Separator class="w-full" />
-    <div class="flex justify-between w-full ">
+    <div class="flex w-full justify-between">
       <h2 class="font-semibold">Shared Links</h2>
       <h2 class="text-sm text-blue-500">See all</h2>
     </div>
-    <div class="flex flex-col gap-4 overflow-y-scroll w-full">
-      <div v-for="i in [1,2,3,4,5]" :key="i" class="flex items-center gap-3 w-full justify-start">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+    <div class="flex w-full flex-col gap-4 overflow-y-scroll">
+      <div v-for="i in [1,2,3,4,5]" :key="i" class="flex w-full items-center justify-start gap-3">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
              xmlns="http://www.w3.org/2000/svg">
           <path
             d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
             stroke-linecap="round"
             stroke-linejoin="round" />
         </svg>
-        <h2 class="hover:underline cursor-pointer font-light">asdnaksdnasjdn.jpg</h2>
+        <h2 class="cursor-pointer font-light hover:underline">asdnaksdnasjdn.jpg</h2>
       </div>
     </div>
 

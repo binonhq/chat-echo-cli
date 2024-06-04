@@ -1,10 +1,12 @@
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
+import { useChatting } from '@/composables/useChatting/useChatting.ts'
 
 export default defineComponent({
   name: 'ChatHistory',
   setup() {
-    const historyChatFake = [
+    const {} = useChatting()
+    const historyChat = [
       {
         id: 1,
         name: 'John Doe',
@@ -29,100 +31,54 @@ export default defineComponent({
         message: 'How about you?',
         time: '10:02',
         unread: true
-      },
-      {
-        id: 4,
-        name: 'Jane Smith',
-        avatar: 'https://minimomonimi.com/cdn/shop/products/simple-avatar-minimomonimi-cartoonish-minimalist-01.png?v=1664979841',
-        message: 'I am fine too',
-        time: '10:03',
-        unread: false
-      },
-      {
-        id: 5,
-        name: 'John Doe',
-        avatar: 'https://minimomonimi.com/cdn/shop/products/simple-avatar-minimomonimi-cartoonish-minimalist-01.png?v=1664979841',
-        message: 'Hello, how are you?',
-        time: '10:00',
-        unread: true
-      },
-      {
-        id: 6,
-        name: 'Jane Doe',
-        avatar: 'https://minimomonimi.com/cdn/shop/products/simple-avatar-minimomonimi-cartoonish-minimalist-01.png?v=1664979841',
-        message: 'I am fine, thank you',
-        time: '10:01',
-        unread: false
-      },
-      {
-        id: 7,
-        name: 'John Smith',
-        avatar: 'https://minimomonimi.com/cdn/shop/products/simple-avatar-minimomonimi-cartoonish-minimalist-01.png?v=1664979841',
-        message: 'How about you?',
-        time: '10:02',
-        unread: true
-      },
-      {
-        id: 8,
-        name: 'John Smith',
-        avatar: 'https://minimomonimi.com/cdn/shop/products/simple-avatar-minimomonimi-cartoonish-minimalist-01.png?v=1664979841',
-        message: 'How about you?',
-        time: '10:02',
-        unread: true
-      },
-      {
-        id: 9,
-        name: 'John Smith',
-        avatar: 'https://minimomonimi.com/cdn/shop/products/simple-avatar-minimomonimi-cartoonish-minimalist-01.png?v=1664979841',
-        message: 'How about you?',
-        time: '10:02',
-        unread: true
-      }, {
-        id: 10,
-        name: 'John Smith',
-        avatar: 'https://minimomonimi.com/cdn/shop/products/simple-avatar-minimomonimi-cartoonish-minimalist-01.png?v=1664979841',
-        message: 'How about you?',
-        time: '10:02',
-        unread: true
       }
     ]
+
+    const handleSelectChat = (id: string) => {
+    }
+
+    const currentChat = computed(() => {
+      return '123'
+    })
+
     return {
-      historyChatFake
+      historyChat,
+      currentChat,
+      handleSelectChat
     }
   }
 })
 </script>
 
 <template>
-  <div class="w-full flex flex-col overflow-y-hidden">
-    <h1 class="font-semibold mb-2">Chats</h1>
-    <div class="relative w-full max-w-sm items-center mb-3">
-      <Input id="search" class="pl-8" placeholder="Search chat ..." type="text" />
-      <div class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
-        <svg class="size-5 text-muted-foreground" fill="none" stroke="currentColor" stroke-width="1.5"
-             viewBox="0 0 24 24"
-             xmlns="http://www.w3.org/2000/svg">
-          <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" stroke-linecap="round"
-                stroke-linejoin="round" />
-        </svg>
+  <div class="flex w-full flex-col overflow-y-hidden">
+    <h1 class="mb-2 font-semibold">Chats</h1>
+    <div class="relative mb-3 w-full items-center">
+      <Input id="search" class="pl-9" placeholder="Search in chat ..." type="text" />
+      <div class="absolute inset-y-0 flex items-center justify-center px-3 start-0">
+        <Icon class="size-4 text-gray-400 cursor-pointer" icon="lucide:search" />
       </div>
     </div>
-    <div class="overflow-y-scroll">
-      <div v-for="chat in historyChatFake" :key="chat.id"
-           :class="['flex items-center justify-between p-3 rounded-[10px]', {
-              'bg-stone-700 text-white': chat.active
-           }]"
+    <div class="overflow-y-scroll space-y-1 h-full">
+      <div v-if="!historyChat.length">
+        <p class="text-center text-gray-400 font-light text-sm mt-10">No chat found</p>
+      </div>
+      <div v-for="chat in historyChat" :key="chat.id"
+           :class="['flex items-center justify-between p-3 rounded-[10px] duration-200 cursor-pointer',
+             currentChat === chat.id.toString() ? 'bg-primary text-white' :'hover:bg-gray-100'
+           ]"
+           @click="handleSelectChat(chat.id.toString())"
       >
         <div class="flex items-center gap-3">
-          <img :src="chat.avatar" alt="avatar" class="w-12 h-12 rounded-full">
+          <Avatar :image="chat.avatar" online size="xs" />
           <div>
-            <h2 :class="chat.unread ? 'font-semibold' : 'text-gray-400'">{{ chat.name }}</h2>
-            <p :class="['font-light text-sm', chat.unread ? 'font-semibold' : 'text-gray-400']">
+            <h2 :class="chat.unread ? 'font-semibold' : ''">{{ chat.name }}</h2>
+            <p :class="['font-light text-sm', chat.unread ? 'font-semibold' : '']">
               {{ chat.message }}</p>
           </div>
         </div>
         <div class="flex flex-col items-end">
-          <p :class="['text-sm', chat.unread ? 'font-semibold' : 'text-gray-400']">{{ chat.time }}</p>
+          <p :class="['text-sm', chat.unread ? 'font-semibold' : '']">{{ chat.time }}</p>
         </div>
       </div>
     </div>
