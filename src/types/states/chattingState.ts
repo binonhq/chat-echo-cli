@@ -1,8 +1,11 @@
-import { User } from '@/types/types.ts'
+import { CallRequest, HistoryChat, Message, User } from '@/types/types.ts'
 
 export type ChattingState = {
-  onlineUsers: User[];
-  webSocket: WebSocket | null;
+  onlineUsers: User[]
+  webSocket: WebSocket | null
+  conversation: Message[]
+  historyChat: HistoryChat[]
+  callRequest: CallRequest | null
+  inCall: boolean
+  isEndConversation: boolean
 }
-
-

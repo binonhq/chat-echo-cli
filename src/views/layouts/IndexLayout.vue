@@ -1,14 +1,17 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useContext } from '@/composables/useContext'
+import { Input } from '@/components/ui/input'
 
 export default defineComponent({
   name: 'IndexLayout',
+  components: { Input },
   setup() {
     const { isRedirecting, isLoading } = useContext()
 
     return {
-      isRedirecting, isLoading
+      isRedirecting,
+      isLoading
     }
   }
 })
@@ -32,7 +35,7 @@ export default defineComponent({
 
 @keyframes l2 {
   100% {
-    background-position: right -50px top 0
+    background-position: right -50px top 0;
   }
 }
 </style>

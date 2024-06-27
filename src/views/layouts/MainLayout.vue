@@ -1,73 +1,43 @@
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue'
+import { defineComponent, watch } from 'vue'
 import SideBar from '@/views/components/SideBar.vue'
 import { useAuth } from '@/composables/useAuth'
 import router from '@/router/router.ts'
 import { useChatting } from '@/composables/useChatting/useChatting.ts'
+import CallRequestDialog from '@/views/components/CallRequestDialog.vue'
 
 export default defineComponent({
   name: 'MainLayout',
-  components: { SideBar },
+  components: { CallRequestDialog, SideBar },
   setup() {
     const { isAuthenticated } = useAuth()
     const { connectToWebsocket } = useChatting()
-    const navCollapsedSize = 4
-    const isCollapsed = ref(false)
 
-    const onCollapse = () => {
-      isCollapsed.value = true
-    }
-
-    const onExpand = () => {
-      isCollapsed.value = false
-    }
-
-    watch(() => isAuthenticated.value, (isAuthenticated) => {
-      if (!isAuthenticated) {
-        router.push('/login')
-        return
+    watch(
+      () => isAuthenticated.value,
+      (isAuthenticated) => {
+        if (!isAuthenticated) {
+          router.push('/login')
+          return
+        }
+        connectToWebsocket()
+      },
+      {
+        immediate: true
       }
-      connectToWebsocket()
-    }, {
-      immediate: true
-    })
+    )
 
-    return {
-      navCollapsedSize,
-      isCollapsed,
-      onCollapse,
-      onExpand
-    }
+    return {}
   }
 })
 </script>
 
 <template>
-  <ResizablePanelGroup
-    id="resize-panel-group-1"
-    class="h-full items-stretch min-h-screen"
-    direction="horizontal"
-  >
-    <ResizablePanel
-      id="resize-panel-1"
-      :class="isCollapsed ? 'min-w-[50px] transition-all duration-300 ease-in-out' : ''"
-      :collapsed-size="navCollapsedSize"
-      :default-size="0"
-      :max-size="15"
-      :min-size="15"
-      collapsible
-      @collapse="onCollapse"
-      @expand="onExpand"
-    >
-      <SideBar :isCollapsed="isCollapsed" />
-    </ResizablePanel>
-    <ResizableHandle id="resize-handle-1" with-handle />
-    <ResizablePanel id="resize-panel-2">
-      <RouterView />
-    </ResizablePanel>
-  </ResizablePanelGroup>
+  <div class="flex w-full min-h-screen z-0">
+    <SideBar class="h-screen" />
+    <RouterView class="grow" />
+  </div>
+  <CallRequestDialog />
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

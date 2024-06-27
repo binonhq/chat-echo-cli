@@ -2,13 +2,13 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: 'SettingPage'
+  name: 'InitVoicePage'
 })
 </script>
 
 <template>
   <div>
-    Setting Page
+    <h1>InitVoicePage</h1>
   </div>
 </template>
 

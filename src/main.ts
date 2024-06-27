@@ -7,19 +7,35 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Toggle } from './components/ui/toggle'
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup
+} from '@/components/ui/resizable'
 import { Icon } from '@iconify/vue'
-
 
 import Logo from './views/components/Logo.vue'
 import axios from 'axios'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 import Avatar from '@/views/components/Avatar.vue'
 import { getToken } from '@/utils/util.ts'
+import { Textarea } from '@/components/ui/textarea'
 
 const app = createApp(App)
 app.use(router)
@@ -34,6 +50,7 @@ app.component('FormLabel', FormLabel)
 app.component('FormControl', FormControl)
 app.component('FormMessage', FormMessage)
 app.component('FormItem', FormItem)
+app.component('FormDescription', FormDescription)
 app.component('Checkbox', Checkbox)
 app.component('Logo', Logo)
 app.component('Alert', Alert)
@@ -49,6 +66,7 @@ app.component('TooltipTrigger', TooltipTrigger)
 app.component('TooltipProvider', TooltipProvider)
 app.component('Icon', Icon)
 app.component('Avatar', Avatar)
+app.component('TextArea', Textarea)
 
 // axios.defaults.baseURL = import.meta.env.VITE_ROOT_API
 // axios.defaults.baseURL = 'http://localhost:8000'
@@ -59,10 +77,8 @@ export const mainAxios = axios.create({
   baseURL: 'http://localhost:8080'
 })
 
-// const voiceAxios = axios.create({
-//   baseURL: 'https://some-custom-domain.example/api/'
-// })
+export const voiceAxios = axios.create({
+  baseURL: 'http://localhost:8000'
+})
 
 app.mount('#app')
-
-

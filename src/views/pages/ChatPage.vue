@@ -3,14 +3,19 @@ import { defineComponent, ref } from 'vue'
 import MyProfileBar from '@/views/components/MyProfileBar.vue'
 import ChatBox from '@/views/components/ChatBox.vue'
 import ChatInformation from '@/views/components/ChatInformation.vue'
+import SideBar from '@/views/components/SideBar.vue'
 
 export default defineComponent({
   name: 'ChatPage',
-  components: { ChatInformation, ChatBox, MyProfileBar },
+  components: { SideBar, ChatInformation, ChatBox, MyProfileBar },
   setup() {
     const showChatInformation = ref(false)
-    const toggleChatInformation = (value: boolean) => {
-      showChatInformation.value = value
+    const toggleChatInformation = (value) => {
+      if (value !== undefined) {
+        showChatInformation.value = value
+        return
+      }
+      showChatInformation.value = !showChatInformation.value
     }
 
     return {
@@ -24,11 +29,18 @@ export default defineComponent({
 <template>
   <div class="flex h-full">
     <MyProfileBar />
-    <ChatBox class="grow" @toggle-show-chat-information="toggleChatInformation" />
-    <ChatInformation v-if="showChatInformation" @toggle-show-chat-information="toggleChatInformation" />
+    <ChatBox
+      class="grow"
+      @toggle-show-chat-information="toggleChatInformation"
+    />
+    <div>
+      <ChatInformation
+        :class="showChatInformation ? 'w-[450px] opacity-100' : 'w-0 opacity-0'"
+        class="overflow-y-hidden duration-200 transition-all ease-out"
+        @toggle-show-chat-information="toggleChatInformation"
+      />
+    </div>
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

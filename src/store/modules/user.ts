@@ -2,7 +2,6 @@ import { UserState } from '@/types/states/userState.ts'
 import { toast } from '@/components/ui/toast'
 import { mainAxios } from '@/main.ts'
 import { User, UserRegisterSchema } from '@/types/types.ts'
-import axios from 'axios'
 import { getToken } from '@/utils/util.ts'
 
 const basePath = '/auth'
@@ -47,7 +46,7 @@ const actions = {
       commit(MutationTypes.SET_USER, userData)
       localStorage.setItem('access_token', response.data.token)
       localStorage.setItem('refresh_token', response.data.refreshToken)
-      axios.defaults.headers.common['Authorization'] = getToken()?.accessToken
+      mainAxios.defaults.headers.common['Authorization'] = getToken().accessToken
       toast(
         {
           title: 'Success',
@@ -106,7 +105,7 @@ const actions = {
       )
     )
     commit(MutationTypes.SET_USER, {} as User)
-    axios.defaults.headers.common['Authorization'] = null
+    mainAxios.defaults.headers.common['Authorization'] = null
   },
   async [Types.GET_USER]({ commit }) {
     try {

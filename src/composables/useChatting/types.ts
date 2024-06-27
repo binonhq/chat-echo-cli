@@ -1,17 +1,31 @@
 import { ComputedRef } from 'vue'
-import { Channel, Message, User } from '@/types/types.ts'
+import { Channel, Message } from '@/types/types.ts'
 
-export type ConnectToWebsocket = () => void;
+export type ConnectToWebsocket = () => Promise<any>
 
 export interface UseChatting {
-  connectToWebsocket: ConnectToWebsocket;
-  onlineUsers: ComputedRef<User[]>;
-  handleSelectChannel: (channel: Channel) => Promise<void>;
-  handleSendMessage: (message: Message) => void;
-  getDetailMessages: (channelId: string) => any;
-  getOrCreateChannel: (channel: Channel) => Promise<any>;
-  getHistoryMessages: () => Promise<any>;
-  currentChannelId: ComputedRef<string>;
+  makeNewCall: (channelId: string, option: string) => Promise<void>
+  getVoiceSettings: (userId: string) => Promise<any>
+  getUserById: (userId: string) => Promise<any>
+  currentChannelId: ComputedRef<string>
+  updateHistoryChat: (channelId: string) => Promise<void>
+  onlineUsers: ComputedRef<any>
+  webSocketInstance: ComputedRef<any>
+  handleSelectChannel: (channel: Channel) => Promise<void>
+  getDetailChannel: (channelId: string) => Promise<any>
+  cancelCall: (channelId: string) => void
+  getDetailMessages: (channelId: string, index: number) => Promise<any>
+  getOrCreateChannel: (channel: Channel) => Promise<any>
+  connectToWebsocket: () => Promise<any>
+  getHistoryMessages: () => Promise<any>
+  handleSendMessage: (message: Message) => void
+  inCall: ComputedRef<any>
+  getAllUser: () => Promise<any>
+  sendPeerSignal: (id: string, channelId: string) => void
+  callRequest: ComputedRef<any>
+  acceptJoinCall: () => void
+  conversation: ComputedRef<any>
+  historyChat: ComputedRef<any>
 }
 
-export type UseChattingReturn = () => UseChatting;
+export type UseChattingReturn = () => UseChatting
