@@ -81,7 +81,7 @@ export default defineComponent({
 
     const avatarSrc = computed(() => {
       if (props.imageId) {
-        const host = import.meta.env.VITE_API
+        const host = import.meta.env.VITE_NODE_API
         return `${host}/images/${props.imageId}`
       }
       return props.type === ChannelType.GROUP

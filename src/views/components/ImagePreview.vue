@@ -20,7 +20,7 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const host = import.meta.env.VITE_API
+    const host = import.meta.env.VITE_NODE_API
     const imageSrc = host + '/attachments/' + props.imageId
 
     return {

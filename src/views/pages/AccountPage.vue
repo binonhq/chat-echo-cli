@@ -131,7 +131,7 @@ export default defineComponent({
 
     const coverSrc = computed(() => {
       if (user.value.coverId) {
-        const host = import.meta.env.VITE_API
+        const host = import.meta.env.VITE_NODE_API
         return `${host}/images/${user.value.coverId}`
       }
       return 'https://iconerecife.com.br/wp-content/plugins/uix-page-builder/uixpb_templates/images/UixPageBuilderTmpl/default-cover-4.jpg'

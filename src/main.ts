@@ -74,11 +74,11 @@ axios.defaults.withCredentials = false
 axios.defaults.headers.common['Authorization'] = getToken()?.accessToken
 
 export const mainAxios = axios.create({
-  baseURL: 'http://localhost:8080'
+  baseURL: import.meta.env.VITE_NODE_SERVER || 'http://localhost:8080'
 })
 
 export const voiceAxios = axios.create({
-  baseURL: 'http://localhost:8000'
+  baseURL: import.meta.env.VITE_PYTHON_SERVER || 'http://localhost:8000'
 })
 
 app.mount('#app')

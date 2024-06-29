@@ -36,7 +36,10 @@ export default defineComponent({
     }
 
     const handleOpenAttachment = (id: string) => {
-      window.open(import.meta.env.VITE_API + '/attachments/' + id, '_blank')
+      window.open(
+        import.meta.env.NODE_VITE_API + '/attachments/' + id,
+        '_blank'
+      )
     }
 
     watch(

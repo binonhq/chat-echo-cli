@@ -12,8 +12,8 @@ import { toast } from '@/components/ui/toast'
 import { useRoute, useRouter } from 'vue-router'
 
 export const useChatting: UseChattingReturn = () => {
-  const host = import.meta.env.VITE_HOST
-  const port = import.meta.env.VITE_PORT
+  const host = import.meta.env.VITE_NODE_HOST
+  const port = import.meta.env.VITE_NODE_PORT
   const store = useStore()
   const route = useRoute()
   const router = useRouter()
