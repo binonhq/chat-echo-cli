@@ -10,7 +10,7 @@ export enum Types {
   LOGIN = 'login',
   REGISTER = 'register',
   LOGOUT = 'logout',
-  GET_USER = 'getUser',
+  GET_USER = 'getUser'
 }
 
 export enum MutationTypes {
@@ -33,7 +33,10 @@ const mutations = {
 }
 
 const actions = {
-  async [Types.LOGIN]({ commit }, payload: { email: string; password: string }) {
+  async [Types.LOGIN](
+    { commit },
+    payload: { email: string; password: string }
+  ) {
     try {
       const response = await mainAxios.post(`${basePath}/login`, {
         email: payload.email,
@@ -46,17 +49,16 @@ const actions = {
       commit(MutationTypes.SET_USER, userData)
       localStorage.setItem('access_token', response.data.token)
       localStorage.setItem('refresh_token', response.data.refreshToken)
-      mainAxios.defaults.headers.common['Authorization'] = getToken().accessToken
-      toast(
-        {
-          title: 'Success',
-          description: 'You have successfully logged in'
-        }
-      )
+      mainAxios.defaults.headers.common['Authorization'] =
+        getToken().accessToken
+      toast({
+        title: 'Success',
+        description: 'You have successfully logged in'
+      })
       return {
         success: true
       }
-    } catch (err) {
+    } catch (err: any) {
       return {
         success: false,
         errorMessage: err.response.data.message
@@ -65,21 +67,17 @@ const actions = {
   },
   async [Types.REGISTER]({}, payload: UserRegisterSchema) {
     try {
-      const response = await mainAxios.post(`${basePath}/register`,
-        payload
-      )
+      const response = await mainAxios.post(`${basePath}/register`, payload)
       localStorage.setItem('access_token', response.data.access_token)
       localStorage.setItem('refresh_token', response.data.refresh_token)
-      toast(
-        {
-          title: 'Success',
-          description: 'You have successfully registered'
-        }
-      )
+      toast({
+        title: 'Success',
+        description: 'You have successfully registered'
+      })
       return {
         success: true
       }
-    } catch (err) {
+    } catch (err: any) {
       return {
         success: false,
         errorMessage: err.response.data.message
@@ -89,21 +87,21 @@ const actions = {
   [Types.LOGOUT]({ commit }) {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
-    mainAxios.post(`${basePath}/logout`).then(r =>
-      toast(
-        {
+    mainAxios
+      .post(`${basePath}/logout`)
+      .then(() =>
+        toast({
           title: 'Success',
           description: 'You have successfully logged out'
-        }
+        })
       )
-    ).catch(err =>
-      toast(
-        {
+      .catch((err: any) => {
+        toast({
           title: 'Error',
           description: 'There was an error logging out'
-        }
-      )
-    )
+        })
+        console.log(err)
+      })
     commit(MutationTypes.SET_USER, {} as User)
     mainAxios.defaults.headers.common['Authorization'] = null
   },

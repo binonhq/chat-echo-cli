@@ -1,3 +1,4 @@
 export type ContextState = {
-  isRedirecting: boolean;
+  isRedirecting: boolean
+  isLoading: boolean
 }

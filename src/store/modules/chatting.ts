@@ -29,6 +29,7 @@ const state: ChattingState = {
   conversation: [] as Message[],
   historyChat: [] as HistoryChat[],
   callRequest: null as CallRequest | null,
+  isEndConversation: false,
   inCall: false
 }
 

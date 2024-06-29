@@ -52,6 +52,10 @@ export default defineComponent({
       return currentUser.value.voiceSettingId === props.setting.id
     })
 
+    const isPublished = computed(() => {
+      return !currentUser.value.privateVoiceSettings.includes(props.setting.id)
+    })
+
     const handlePlayVoiceSetting = async () => {
       if (isPlaying.value) {
         audioRef.value.pause()
@@ -68,9 +72,12 @@ export default defineComponent({
       }
 
       try {
-        const res = await voiceAxios.get(`/text-to-speech/play_voice_setting?voice_setting_id=${props.setting.id}`, {
-          responseType: 'arraybuffer'
-        })
+        const res = await voiceAxios.get(
+          `/text-to-speech/play_voice_setting?voice_setting_id=${props.setting.id}`,
+          {
+            responseType: 'arraybuffer'
+          }
+        )
         const blob = new Blob([res.data], { type: 'audio/wav' })
         audio.value = URL.createObjectURL(blob)
         await nextTick(() => {
@@ -90,12 +97,59 @@ export default defineComponent({
 
     const handleActivate = async () => {
       try {
-        await mainAxios.put(`/auth/update_voice?voice_setting_id=${props.setting.id}`)
+        await mainAxios.put(
+          `/auth/update_voice?voice_setting_id=${props.setting.id}`
+        )
         router.go(0)
       } catch (error) {
         toast({
           title: 'Error',
           description: 'Failed to activate voice setting'
+        })
+      }
+    }
+
+    const handleRemove = async () => {
+      try {
+        await mainAxios.delete(
+          `/auth/delete_voice_setting?voice_setting_id=${props.setting.id}`
+        )
+        router.go(0)
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to remove voice setting'
+        })
+      }
+    }
+
+    const handleUpdatePublish = async () => {
+      try {
+        await mainAxios.put(
+          `/auth/publish_voice_setting?voice_setting_id=${props.setting.id}&option=${isPublished.value ? 'unpublish' : 'publish'}`
+        )
+        router.go(0)
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to update publish voice setting'
+        })
+      }
+    }
+
+    const handleClone = async () => {
+      try {
+        await mainAxios.post(
+          `/auth/clone_voice_setting?voice_setting_id=${props.setting.id}`
+        )
+        toast({
+          title: 'Success',
+          description: 'Voice setting cloned'
+        })
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to clone voice setting'
         })
       }
     }
@@ -107,7 +161,11 @@ export default defineComponent({
       audio,
       isPlaying,
       audioRef,
-      handleActivate
+      isPublished,
+      handleRemove,
+      handleActivate,
+      handleUpdatePublish,
+      handleClone
     }
   }
 })
@@ -115,20 +173,30 @@ export default defineComponent({
 
 <template>
   <div
-    class="flex justify-between items-center mb-2 border-[1px] p-5 rounded-md h-fit hover:border-primary cursor-pointer">
+    class="flex justify-between items-center mb-2 border-[1px] p-5 rounded-md h-fit hover:border-primary cursor-pointer"
+  >
     <div class="flex gap-4 items-center">
-      <button class="bg-primary text-white size-10 rounded-full flex items-center justify-center"
-              @click="handlePlayVoiceSetting()">
+      <button
+        class="bg-primary text-white size-10 rounded-full flex items-center justify-center"
+        @click="handlePlayVoiceSetting()"
+      >
         <Icon :icon="isPlaying ? 'lucide:square' : 'lucide:play'" />
       </button>
       <div class="flex flex-col gap-1">
-        <p class="text-lg font-semibold">Setting {{ index + 1 }}</p>
-        <p class="text-sm text-gray-500">Create at: {{ convertTime(setting.createAt) }}</p>
+        <p class="text-md font-semibold">Setting {{ index + 1 }}</p>
+        <p class="text-[9pt] text-gray-500">
+          Create at: {{ convertTime(setting.createAt) }}
+        </p>
       </div>
     </div>
     <div v-if="canSetting" class="flex items-center gap-2">
-      <Badge v-if="isActive">Active</Badge>
-      <DropdownMenu v-if='canSetting'>
+      <div class="flex flex-col gap-2">
+        <Badge v-if="isActive" class="bg-green-500">Active</Badge>
+        <Badge :class="isPublished ? 'bg-blue-400' : 'bg-primary'"
+          >{{ isPublished ? 'Public' : 'Private' }}
+        </Badge>
+      </div>
+      <DropdownMenu>
         <DropdownMenuTrigger as-child>
           <Button size="icon" variant="ghost">
             <Icon icon="lucide-ellipsis-vertical"></Icon>
@@ -142,25 +210,49 @@ export default defineComponent({
               <p>Activate</p>
             </div>
           </DropdownMenuItem>
-          <DropdownMenuItem v-if="!isActive">
+          <DropdownMenuItem v-if="!isActive" @click="handleRemove">
             <div class="flex gap-2 items-center">
               <Icon icon="lucide-trash"></Icon>
               <p>Remove</p>
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <div class="flex gap-2 items-center">
-              <Icon icon="lucide-globe"></Icon>
-              <p>Public</p>
+            <div class="flex gap-2 items-center" @click="handleUpdatePublish">
+              <Icon v-if="!isPublished" icon="lucide-globe"></Icon>
+              <Icon v-else icon="lucide-lock"></Icon>
+              <p>{{ isPublished ? 'Unpublish' : 'Publish' }}</p>
             </div>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
-    <audio v-if="audio" ref="audioRef" :src="audio" class='hidden' controls v-on:ended="isPlaying=false" />
+    <div v-else>
+      <DropdownMenu>
+        <DropdownMenuTrigger as-child>
+          <Button size="icon" variant="ghost">
+            <Icon icon="lucide-ellipsis-vertical"></Icon>
+            <span class="sr-only">More</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" class="gap-1 flex flex-col">
+          <DropdownMenuItem @click="handleClone">
+            <div class="flex gap-2 items-center">
+              <Icon icon="lucide:copy-plus"></Icon>
+              <p>Clone</p>
+            </div>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+    <audio
+      v-if="audio"
+      ref="audioRef"
+      :src="audio"
+      class="hidden"
+      controls
+      v-on:ended="isPlaying = false"
+    />
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

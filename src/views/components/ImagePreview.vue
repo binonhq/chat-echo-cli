@@ -8,9 +8,13 @@ export default defineComponent({
   props: {
     imageId: {
       type: String,
-      required: true
+      default: ''
     },
     classProps: {
+      type: String,
+      default: ''
+    },
+    src: {
       type: String,
       default: ''
     }
@@ -29,13 +33,21 @@ export default defineComponent({
 <template>
   <Dialog>
     <DialogTrigger>
-      <img :alt="imageSrc" :class="classProps" :src="imageSrc" />
+      <img v-if="src !== ''" :alt="imageSrc" :class="classProps" :src="src" />
+      <img v-else :alt="imageSrc" :class="classProps" :src="imageSrc" />
     </DialogTrigger>
     <DialogContent class="max-w-screen-2xl max-h-[90%] overflow-hidden">
       <img
+        v-if="src !== ''"
+        :alt="imageSrc"
+        :src="src"
+        class="p-5 h-full w-full object-contain overflow-hidden"
+      />
+      <img
+        v-else
         :alt="imageSrc"
         :src="imageSrc"
-        class="p-5 h-full w-full object-cover overflow-hidden"
+        class="p-5 h-full w-full object-contain overflow-hidden"
       />
     </DialogContent>
   </Dialog>

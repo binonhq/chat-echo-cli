@@ -15,7 +15,11 @@ import { cn } from '@/utils'
 const props = defineProps<
   DialogContentProps & { class?: HTMLAttributes['class']; openState?: Boolean }
 >()
-const emits = defineEmits<DialogContentEmits>()
+const emits = defineEmits<
+  DialogContentEmits & {
+    close: any[]
+  }
+>()
 
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props

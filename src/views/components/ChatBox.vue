@@ -28,6 +28,11 @@ export type ChatInfo = {
   avatarId: string
 }
 
+type AudioDevice = {
+  id: string
+  name: string
+}
+
 export default defineComponent({
   name: 'ChatBox',
   methods: { convertTime },
@@ -52,6 +57,7 @@ export default defineComponent({
 
     const isShowStickerBox = ref(false)
     const isShowAttachFile = ref(false)
+    const isShowRecording = ref(false)
     const messageContent = ref('')
     const attachment = ref(null as File | null)
     const stickerId = ref('')
@@ -60,10 +66,27 @@ export default defineComponent({
     const channelType = ref('')
     const messageIndex = ref(0)
     const isSending = ref(false)
+    const timeRecording = ref(0)
+    const isRecording = ref(false)
+    const timeRecordingInterval = ref()
 
     const isDisableSendButton = computed(() => {
       return messageContent.value === '' && !attachment.value
     })
+
+    const toggleShowRecording = async () => {
+      if (isShowRecording.value) {
+        if (isRecording.value) {
+          await mediaRecorderRef.value.stop()
+          isRecording.value = false
+          timeRecording.value = 0
+          clearInterval(timeRecordingInterval.value)
+        }
+        audioFile.value = null
+        audio.value = ''
+      }
+      isShowRecording.value = !isShowRecording.value
+    }
 
     const toggleStickerBox = () => {
       isShowStickerBox.value = !isShowStickerBox.value
@@ -74,6 +97,12 @@ export default defineComponent({
     const toggleShowChatInformation = () => {
       emit('toggle-show-chat-information')
     }
+
+    const timeRecordingDisplay = computed(() => {
+      const minutes = Math.floor(timeRecording.value / 60)
+      const seconds = timeRecording.value % 60
+      return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
+    })
 
     const handleUploadAttachment = async () => {
       const file = attachment.value
@@ -93,6 +122,29 @@ export default defineComponent({
       } catch (e) {
         toast({
           title: 'Update avatar failed'
+        })
+      }
+      return ''
+    }
+
+    const handleUploadAudio = async () => {
+      const file = audioFile.value
+      if (!file) return
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('kind', 'attachment')
+      formData.append('channelId', currentChannelId.value)
+      try {
+        const response = await mainAxios.post('/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          responseType: 'json'
+        })
+        return response.data.id
+      } catch (e) {
+        toast({
+          title: 'Upload audio fails'
         })
       }
       return ''
@@ -119,6 +171,23 @@ export default defineComponent({
       isShowAttachFile.value = false
       isSending.value = false
     }
+
+    const sendAudio = async () => {
+      isSending.value = true
+      const attachmentId = await handleUploadAudio()
+      const message = {
+        content: '',
+        attachmentId: attachmentId,
+        stickerId: stickerId.value,
+        channelId: currentChannelId.value
+      } as MessageType
+
+      handleSendMessage(message)
+      audioFile.value = null
+      audio.value = ''
+      isSending.value = false
+    }
+
     const onFileChange = (e: any) => {
       attachment.value = e.target.files[0]
     }
@@ -182,7 +251,7 @@ export default defineComponent({
 
     const detailConversation = computed(() => {
       const groupedByDate = conversation.value.reduce(
-        (acc: { [key: string]: any }, message) => {
+        (acc: { [key: string]: any }, message: any) => {
           const date = new Date(message.createdAt).toDateString()
           if (!acc[date]) {
             acc[date] = []
@@ -204,7 +273,80 @@ export default defineComponent({
       isShowAttachFile.value = false
     }
 
+    const mediaRecorderRef = ref()
+    const audioFile = ref()
+    const audio = ref()
+
+    const handleRecording = () => {
+      if (isRecording.value) {
+        // Stop recording
+        if (mediaRecorderRef.value) {
+          mediaRecorderRef.value.stop()
+        }
+        isRecording.value = false
+        timeRecording.value = 0
+        clearInterval(timeRecordingInterval.value)
+        return
+      }
+      // Start recording
+      isRecording.value = true
+
+      timeRecordingInterval.value = setInterval(() => {
+        timeRecording.value += 1
+      }, 1000)
+
+      navigator.mediaDevices
+        .getUserMedia({ audio: { deviceId: recordDevice.value.id } })
+        .then((stream) => {
+          const mediaRecorder = new MediaRecorder(stream)
+          const chunks: Blob[] = []
+          mediaRecorder.ondataavailable = (e) => {
+            chunks.push(e.data)
+          }
+          mediaRecorder.onstop = () => {
+            if (!isShowRecording.value) {
+              return
+            }
+            const blob = new Blob(chunks, { type: 'audio/wav' })
+            const newFile = new File([blob], 'audio.wav', { type: 'audio/wav' })
+            if (newFile.size / 1024 / 1024 > 5) {
+              toast({
+                title: 'Error',
+                description: 'Audio file should be less than 5MB'
+              })
+              return
+            }
+            audioFile.value = newFile
+            audio.value = URL.createObjectURL(newFile)
+          }
+          mediaRecorderRef.value = mediaRecorder
+          mediaRecorder.start()
+        })
+    }
+
+    const recordDevice = ref({} as AudioDevice)
+    const getAvailableRecordingDevices = async () => {
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const availableRecordingDevices = devices
+        .filter((device) => device.kind === 'audioinput' && device.deviceId)
+        ?.map((device) => {
+          return {
+            id: device.deviceId,
+            name: device.label
+          } as AudioDevice
+        })
+      recordDevice.value = availableRecordingDevices.length
+        ? availableRecordingDevices[0]
+        : ({} as AudioDevice)
+    }
+
+    const handleRemoveAudio = () => {
+      audio.value = ''
+      audioFile.value = null
+    }
+
     onMounted(() => {
+      getAvailableRecordingDevices()
       if (chatBoxRef.value) {
         chatBoxRef.value.addEventListener('scroll', handleScroll)
       }
@@ -224,6 +366,11 @@ export default defineComponent({
       toggleShowAttachFile,
       sendMessage,
       isShowAttachFile,
+      isShowRecording,
+      isRecording,
+      audio,
+      handleRemoveAudio,
+      sendAudio,
       messageContent,
       attachment,
       isDisableSendButton,
@@ -233,8 +380,11 @@ export default defineComponent({
       rawConversation: conversation,
       chatBoxRef,
       channelType,
+      timeRecordingDisplay,
       removeAttachment,
-      onFileChange
+      onFileChange,
+      toggleShowRecording,
+      handleRecording
     }
   }
 })
@@ -329,7 +479,7 @@ export default defineComponent({
               placeholder="Type a message ..."
               v-on:keyup.enter="sendMessage"
             />
-            <Toggle>
+            <Toggle @click="toggleShowRecording">
               <Icon icon="lucide:mic" />
             </Toggle>
             <Toggle @click="toggleShowAttachFile">
@@ -341,6 +491,42 @@ export default defineComponent({
             >
               <div v-if="isSending" class="loader"></div>
               <Icon v-else icon="lucide:send" />
+            </Button>
+          </div>
+          <div
+            v-if="isShowRecording"
+            class="flex flex-col gap-2 items-center justify-center h-[200px]"
+          >
+            <p class="text-xl">{{ timeRecordingDisplay }}</p>
+            <Button
+              :class="{ 'bg-green-500': isRecording }"
+              class="rounded-full w-20 h-20"
+              @click="handleRecording"
+            >
+              <Icon
+                :fill="isRecording"
+                :icon="isRecording ? 'lucide:square' : 'lucide:mic'"
+                class="size-6"
+              />
+            </Button>
+            <p class="text-md text-center py-2">
+              {{ isRecording ? 'Recording...' : 'Start record' }}
+            </p>
+          </div>
+          <div
+            v-if="audio"
+            class="flex items-center gap-4 mb-2 w-full justify-center"
+          >
+            <Button
+              class="flex gap-1 items-center"
+              variant="destructive"
+              @click="handleRemoveAudio"
+            >
+              <Icon icon="lucide:trash" />
+            </Button>
+            <audio :src="audio" class="w-1/2" controls></audio>
+            <Button class="flex gap-1 items-center" @click="sendAudio">
+              <Icon icon="lucide:send" />
             </Button>
           </div>
         </div>

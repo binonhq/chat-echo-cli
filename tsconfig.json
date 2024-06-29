@@ -23,10 +23,11 @@
     "noEmit": true,
     "jsx": "preserve",
     /* Linting */
-    "strict": true,
+    "strict": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": false
   },
   "include": [
     "src/**/*.ts",

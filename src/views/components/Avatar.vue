@@ -2,9 +2,11 @@
 import { computed, defineComponent } from 'vue'
 import { useChatting } from '@/composables/useChatting/useChatting.ts'
 import { ChannelType } from '@/types/types.ts'
+import ImagePreview from '@/views/components/ImagePreview.vue'
 
 export default defineComponent({
   name: 'Avatar',
+  components: { ImagePreview },
   props: {
     imageId: {
       type: String,
@@ -21,6 +23,10 @@ export default defineComponent({
     type: {
       type: String,
       default: ''
+    },
+    canPreview: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -99,7 +105,13 @@ export default defineComponent({
 
 <template>
   <div :class="sizeAvatar.avatar" class="relative">
+    <ImagePreview
+      v-if="imageId && canPreview"
+      :src="avatarSrc"
+      class-props="rounded-full w-full h-full object-cover bg-gray-200"
+    />
     <img
+      v-else
       :src="avatarSrc"
       alt="avatar"
       class="rounded-full w-full h-full object-cover bg-gray-200"

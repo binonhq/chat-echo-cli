@@ -42,9 +42,9 @@ export default defineComponent({
     const mediaStream = ref<MediaStream | null>(null)
 
     const getUserMedia =
-      navigator.getUserMedia ||
-      navigator.webkitGetUserMedia ||
-      navigator.mozGetUserMedia
+      navigator?.getUserMedia ||
+      navigator?.webkitGetUserMedia ||
+      navigator?.mozGetUserMedia
 
     myPeer.on('open', (id) => {
       console.log('My peer id:', id)

@@ -93,14 +93,21 @@ export default defineComponent({
     })
 
     const isImageAttachment = computed(() => {
-      return attachment.value.type.includes('image')
+      return attachment.value?.type?.includes('image')
+    })
+
+    const isSoundAttachment = computed(() => {
+      return attachment.value?.type?.includes('audio')
+    })
+
+    const attachmentSource = computed(() => {
+      return (
+        import.meta.env.VITE_API + '/attachments/' + props.message.attachmentId
+      )
     })
 
     const handleOpenAttachment = () => {
-      window.open(
-        import.meta.env.VITE_API + '/attachments/' + props.message.attachmentId,
-        '_blank'
-      )
+      window.open(attachmentSource.value, '_blank')
     }
 
     return {
@@ -113,6 +120,8 @@ export default defineComponent({
       audioRef,
       attachment,
       isImageAttachment,
+      isSoundAttachment,
+      attachmentSource,
       handleClickSound,
       handleOpenAttachment
     }
@@ -166,8 +175,9 @@ export default defineComponent({
           :image-id="message.attachmentId"
           class-props="max-w-[350px] rounded-md"
         />
+        <audio v-if="isSoundAttachment" :src="attachmentSource" controls />
         <div
-          v-if="attachment.name && !isImageAttachment"
+          v-if="attachment.name && !isImageAttachment && !isSoundAttachment"
           class="flex gap-2 items-start border-[1px] border-gray-200 rounded-sm p-3 max-w-[60%] overflow-hidden cursor-pointer bg-white"
           @click="handleOpenAttachment"
         >

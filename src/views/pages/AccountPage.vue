@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue'
+import { computed, defineComponent, onMounted, ref, watch } from 'vue'
 import Avatar from '@/views/components/Avatar.vue'
 import { useAuth } from '@/composables/useAuth'
 import { Icon } from '@iconify/vue'
@@ -29,9 +29,14 @@ export default defineComponent({
     const { currentUser } = useAuth()
     const { getVoiceSettings, getUserById, handleSelectChannel } = useChatting()
     const userData = ref({} as User)
+    const feedbackMessage = ref('')
+    const feedbacks = ref([])
 
     const isMe = computed(() => {
-      return route.path.split('/')[1] === 'account'
+      return (
+        route.path.split('/')[1] === 'account' ||
+        route.path.split('/')[2] === currentUser.value.userId
+      )
     })
 
     const userId = computed(() => {
@@ -40,15 +45,6 @@ export default defineComponent({
     })
 
     const voiceSettings = ref([] as VoiceSettingType[])
-
-    onMounted(async () => {
-      voiceSettings.value = await getVoiceSettings(userId.value)
-      if (isMe.value) {
-        userData.value = currentUser.value
-      } else {
-        userData.value = await getUserById(userId.value)
-      }
-    })
 
     const user = computed(() =>
       isMe.value ? currentUser.value : userData.value
@@ -80,7 +76,7 @@ export default defineComponent({
           },
           responseType: 'arraybuffer'
         })
-        router.go()
+        router.go(0)
       } catch (e) {
         toast({
           title: 'Update avatar failed'
@@ -102,10 +98,33 @@ export default defineComponent({
           },
           responseType: 'arraybuffer'
         })
-        router.go()
+        router.go(0)
       } catch (e) {
         toast({
           title: 'Update cover failed'
+        })
+      }
+    }
+
+    const handleSendFeedback = async () => {
+      if (!feedbackMessage.value) {
+        toast({
+          title: 'Feedback is empty'
+        })
+        return
+      }
+      try {
+        await mainAxios.post('/auth/give_feedback', {
+          content: feedbackMessage.value,
+          userId: user.value._id || user.value.userId
+        })
+        await getUserData()
+        toast({
+          title: 'Feedback sent'
+        })
+      } catch (e) {
+        toast({
+          title: 'Send feedback failed'
         })
       }
     }
@@ -117,14 +136,47 @@ export default defineComponent({
       }
       return 'https://iconerecife.com.br/wp-content/plugins/uix-page-builder/uixpb_templates/images/UixPageBuilderTmpl/default-cover-4.jpg'
     })
+    const getUserData = async () => {
+      try {
+        const response = await getUserById(userId.value)
+        userData.value = response.user
+        feedbacks.value = response.feedbacks
+      } catch (e) {
+        toast({
+          title: 'Get user failed'
+        })
+      }
+    }
+
+    onMounted(async () => {
+      await init()
+    })
+
+    const init = async () => {
+      voiceSettings.value = await getVoiceSettings(userId.value)
+      try {
+        await getUserData()
+      } catch (e) {
+        toast({
+          title: 'Get user failed'
+        })
+      }
+    }
+
+    watch(userId, async () => {
+      await init()
+    })
 
     return {
       user,
       voiceSettings,
+      feedbacks,
+      feedbackMessage,
       handleEditProfile,
       handleSendMessage,
       handleUpdateAvatar,
       handleUpdateCover,
+      handleSendFeedback,
       coverSrc,
       isMe
     }
@@ -163,7 +215,7 @@ export default defineComponent({
       </div>
       <div class="absolute transform left-20 -translate-y-1/2">
         <div class="relative border-[4px] border-white rounded-full shadow">
-          <Avatar :image-id="user.avatarId" size="md" />
+          <Avatar :image-id="user.avatarId" can-preview size="md" />
           <label
             v-if="isMe"
             class="absolute bottom-0 right-0 text-white p-2 bg-primary rounded-full cursor-pointer border-[4px] border-white"
@@ -233,39 +285,61 @@ export default defineComponent({
     </div>
     <Separator class="w-full mt-10" />
     <div class="flex flex-col lg:flex-row py-10 gap-10">
-      <div class="flex flex-col gap-5 grow">
+      <div v-if="voiceSettings?.length" class="flex flex-col gap-5 grow">
         <p class="text-xl font-semibold">Public voice settings</p>
         <div class="grid lg:grid-cols-2 gap-5">
           <VoiceSetting
             v-for="(setting, index) in voiceSettings"
             :key="setting.id"
+            :can-setting="isMe"
             :index="index"
             :setting="setting"
             class="h-full"
           />
         </div>
       </div>
-      <div class="space-y-5 lg:w-1/3">
-        <p class="font-semibold text-xl">10 reviews</p>
-        <div class="grid grid-cols-1 gap-3">
-          <div
-            v-for="i in [0, 1]"
-            class="border-[1px] rounded-md py-5 px-5 space-y-5"
-          >
-            <div class="flex gap-4 items-center">
-              <Avatar size="sm" />
-              <div>
-                <p class="font-semibold">John Doe</p>
-                <p class="font-light text-sm">10:30 PM 1-2-2024</p>
-              </div>
-            </div>
-            <p class="text-[11pt] pl-9 border-l-2 ml-4 pb-3">
-              This was a concept for a profile page for a client a while back.
-              The aim was for a user to have a central place to offer products
-              and services to sell as well as booking.
-            </p>
+      <div class="ml-auto space-y-5 lg:w-1/3">
+        <template v-if="!isMe">
+          <p class="font-semibold text-xl">Give a review</p>
+          <div class="flex gap-3 w-full">
+            <Input v-model="feedbackMessage" placeholder="Your feedback..." />
+            <Button
+              :disabled="feedbackMessage === ''"
+              @click="handleSendFeedback"
+            >
+              <Icon icon="lucide:send" size="5" />
+            </Button>
           </div>
-        </div>
+        </template>
+        <template v-if="feedbacks.length">
+          <p class="font-semibold text-xl">{{ feedbacks.length }} reviews</p>
+          <div class="grid grid-cols-1 gap-3">
+            <div
+              v-for="feedback in feedbacks"
+              :key="feedback._id"
+              class="border-[1px] rounded-md py-5 px-5 space-y-5"
+            >
+              <div class="flex gap-4 items-center">
+                <Avatar :image-id="feedback.createdBy?.avatarId" size="sm" />
+                <div>
+                  <router-link
+                    :to="`/community/${feedback.createdBy?._id}`"
+                    class="font-semibold"
+                  >
+                    {{ feedback.createdBy?.firstName }}
+                    {{ feedback.createdBy?.lastName }}
+                  </router-link>
+                  <p class="font-light text-sm">
+                    {{ convertTime(feedback.createdAt) }}
+                  </p>
+                </div>
+              </div>
+              <p class="text-[11pt] pl-9 border-l-2 ml-4 pb-3">
+                {{ feedback.content }}
+              </p>
+            </div>
+          </div>
+        </template>
       </div>
     </div>
   </div>

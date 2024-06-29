@@ -12,6 +12,7 @@ export type User = {
   phone: string
   about: string
   coverId: string
+  privateVoiceSettings: string[]
 }
 
 export type UserRegisterSchema = {

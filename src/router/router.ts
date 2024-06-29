@@ -2,8 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { Types as ContextTypes } from '@/store/modules/context.ts'
 import { Types as UserTypes } from '@/store/modules/user.ts'
 
-import store from '@/store/store.ts'
-
 import LandingPage from '../views/pages/LandingPage.vue'
 import LoginPage from '@/views/pages/LoginPage.vue'
 import RegisterPage from '@/views/pages/RegisterPage.vue'
@@ -18,6 +16,9 @@ import SettingLayout from '@/views/layouts/SettingLayout.vue'
 import SettingGeneral from '@/views/pages/SettingGeneral.vue'
 import SettingPersonalInfo from '@/views/pages/SettingPersonalInfo.vue'
 import SettingSecurity from '@/views/pages/SettingSecurity.vue'
+import { useStore } from 'vuex'
+
+const store = useStore()
 
 const router = createRouter({
   history: createWebHistory(),
@@ -66,14 +67,14 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  let user = store.state.user.currentUser.email
+  let user = store.state?.user?.currentUser?.email
   if (!user) {
     await store.dispatch(UserTypes.GET_USER)
   }
   await store.dispatch(ContextTypes.SET_REDIRECTING, true)
 
   if (to.meta.requiresAuth) {
-    user = store.state.user.currentUser.email
+    user = store.state?.user?.currentUser?.email
     if (user) {
       next()
     } else {

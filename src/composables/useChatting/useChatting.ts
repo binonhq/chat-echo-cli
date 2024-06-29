@@ -20,7 +20,7 @@ export const useChatting: UseChattingReturn = () => {
 
   const onlineUsers = computed(() =>
     store.state.chatting.onlineUsers?.filter(
-      (user) => user.userId !== store.state.user.currentUser.userId
+      (user: any) => user.userId !== store.state.user.currentUser.userId
     )
   )
 
@@ -188,7 +188,7 @@ export const useChatting: UseChattingReturn = () => {
   }
 
   const updateHistoryChat = async (channelId: string) => {
-    const history = historyChat.value.map((channel) => {
+    const history = historyChat.value.map((channel: any) => {
       if (channel._id === channelId) {
         return {
           ...channel,
@@ -221,7 +221,7 @@ export const useChatting: UseChattingReturn = () => {
     try {
       const response = await mainAxios.get(`/channel/${channelId}`)
       return response.data
-    } catch (err) {
+    } catch (err: any) {
       toast({
         title: 'Error',
         description: err.response.data.message
