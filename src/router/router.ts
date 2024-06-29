@@ -17,8 +17,7 @@ import SettingGeneral from '@/views/pages/SettingGeneral.vue'
 import SettingPersonalInfo from '@/views/pages/SettingPersonalInfo.vue'
 import SettingSecurity from '@/views/pages/SettingSecurity.vue'
 import { useStore } from 'vuex'
-
-const store = useStore()
+import store from '@/store/store.ts'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -66,15 +65,15 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach(async (to, from, next) => {
-  let user = store.state?.user?.currentUser?.email
+router.beforeEach(async (to, _from, next) => {
+  let user = store.state.user.currentUser.email
   if (!user) {
     await store.dispatch(UserTypes.GET_USER)
   }
   await store.dispatch(ContextTypes.SET_REDIRECTING, true)
 
   if (to.meta.requiresAuth) {
-    user = store.state?.user?.currentUser?.email
+    user = store.state.user.currentUser.email
     if (user) {
       next()
     } else {
@@ -86,6 +85,7 @@ router.beforeEach(async (to, from, next) => {
 })
 
 router.afterEach(() => {
+  const store = useStore()
   store.dispatch(ContextTypes.SET_REDIRECTING, false)
 })
 

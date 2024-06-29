@@ -47,7 +47,7 @@ export default defineComponent({
     Input,
     Message
   },
-  setup(props, { emit }) {
+  setup(_props, { emit }) {
     const {
       handleSendMessage,
       getDetailMessages,

@@ -12,7 +12,7 @@ import ImagePreview from '@/views/components/ImagePreview.vue'
 export default defineComponent({
   name: 'ChatInformation',
   components: { ImagePreview, EditGroup, Button, Icon },
-  setup(props, { emit }) {
+  setup(_props, { emit }) {
     const { getDetailChannel, currentChannelId, getDetailMessages } =
       useChatting()
     const detailChannel = ref({} as ChannelDetail)

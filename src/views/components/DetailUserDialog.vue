@@ -48,7 +48,7 @@ export default defineComponent({
       default: []
     }
   },
-  setup(props, ctx) {
+  setup(props) {
     const { handleSendMessage, getOrCreateChannel } = useChatting()
     const { currentUser } = useAuth()
 

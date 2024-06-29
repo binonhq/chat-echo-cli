@@ -24,7 +24,7 @@ export interface UseChatting {
   sendPeerSignal: (id: string, channelId: string) => void
   callRequest: ComputedRef<any>
   acceptJoinCall: () => void
-  conversation: ComputedRef<any>
+  conversation: ComputedRef<Message[]>
   historyChat: ComputedRef<any>
 }
 
