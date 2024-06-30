@@ -40,10 +40,11 @@ export default defineComponent({
     const callRefs = ref<{ [key: string]: any }>({})
     const myMediaStream = ref<MediaStream | null>(null)
 
+    const navigatoInstance = navigator as any
     const getUserMedia =
-      navigator.getUserMedia ||
-      navigator.webkitGetUserMedia ||
-      navigator.mozGetUserMedia
+      navigatoInstance.getUserMedia ||
+      navigatoInstance.webkitGetUserMedia ||
+      navigatoInstance.mozGetUserMedia
 
     const getMyMediaStream = async () => {
       navigator.mediaDevices.enumerateDevices().then((devices) => {
