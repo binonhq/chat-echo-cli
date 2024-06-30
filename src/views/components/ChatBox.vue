@@ -326,16 +326,16 @@ export default defineComponent({
 
     const recordDevice = ref({} as AudioDevice)
     const getAvailableRecordingDevices = async () => {
-      const devices = await navigator.mediaDevices.enumerateDevices()
+      const devices = await navigator.mediaDevices?.enumerateDevices()
       const availableRecordingDevices = devices
-        .filter((device) => device.kind === 'audioinput' && device.deviceId)
+        ?.filter((device) => device.kind === 'audioinput' && device.deviceId)
         ?.map((device) => {
           return {
             id: device.deviceId,
             name: device.label
           } as AudioDevice
         })
-      recordDevice.value = availableRecordingDevices.length
+      recordDevice.value = availableRecordingDevices?.length
         ? availableRecordingDevices[0]
         : ({} as AudioDevice)
     }

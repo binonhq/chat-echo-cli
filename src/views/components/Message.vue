@@ -102,7 +102,7 @@ export default defineComponent({
 
     const attachmentSource = computed(() => {
       return (
-        import.meta.env.VITE_NODE_API +
+        import.meta.env.VITE_NODE_SERVER +
         '/attachments/' +
         props.message.attachmentId
       )

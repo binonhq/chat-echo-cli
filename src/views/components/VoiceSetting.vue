@@ -1,6 +1,6 @@
 <script lang="ts">
-import { computed, defineComponent, nextTick, ref } from 'vue'
-import { mainAxios, voiceAxios } from '@/main.ts'
+import { computed, defineComponent, ref } from 'vue'
+import { mainAxios } from '@/main.ts'
 import { toast } from '@/components/ui/toast'
 import { convertTime } from '@/utils/util.ts'
 import { VoiceSetting } from '@/types/types.ts'
@@ -44,7 +44,6 @@ export default defineComponent({
   setup(props) {
     const { currentUser } = useAuth()
     const router = useRouter()
-    const audio = ref()
     const audioRef = ref()
     const isPlaying = ref(false)
 
@@ -62,38 +61,16 @@ export default defineComponent({
         isPlaying.value = false
         return
       }
-      if (audio.value) {
-        audioRef.value.play()
-        isPlaying.value = true
-        audioRef.value.onEnded = () => {
-          isPlaying.value = false
-        }
-        return
+      audioRef.value.play()
+      isPlaying.value = true
+      audioRef.value.onEnded = () => {
+        isPlaying.value = false
       }
-
-      try {
-        const res = await voiceAxios.get(
-          `/text-to-speech/play_voice_setting?voice_setting_id=${props.setting.id}`,
-          {
-            responseType: 'arraybuffer'
-          }
-        )
-        const blob = new Blob([res.data], { type: 'audio/wav' })
-        audio.value = URL.createObjectURL(blob)
-        await nextTick(() => {
-          audioRef.value.play()
-          isPlaying.value = true
-          audioRef.value.onEnded = () => {
-            isPlaying.value = false
-          }
-        })
-      } catch (error) {
-        toast({
-          title: 'Error',
-          description: 'Failed to play voice setting'
-        })
-      }
+      return
     }
+
+    const audioSrc =
+      import.meta.env.VITE_NODE_SERVER + '/voice-settings/' + props.setting.id
 
     const handleActivate = async () => {
       try {
@@ -158,14 +135,14 @@ export default defineComponent({
       handlePlayVoiceSetting,
       convertTime,
       isActive,
-      audio,
       isPlaying,
       audioRef,
       isPublished,
       handleRemove,
       handleActivate,
       handleUpdatePublish,
-      handleClone
+      handleClone,
+      audioSrc
     }
   }
 })
@@ -245,9 +222,8 @@ export default defineComponent({
       </DropdownMenu>
     </div>
     <audio
-      v-if="audio"
       ref="audioRef"
-      :src="audio"
+      :src="audioSrc"
       class="hidden"
       controls
       v-on:ended="isPlaying = false"

@@ -23,12 +23,11 @@ export default defineComponent({
       cancelCall
     } = useChatting()
     const route = useRoute()
-    const { channel_id, option } = route.query
+    const { channel_id, option, isFromMe } = route.query
 
     const channel = ref()
-    const listJoiners = ref([])
+    const listJoiners = ref(0)
     const isTurnOffCamera = ref(option === 'audio')
-    const isSoundOff = ref(false)
     const isMicOff = ref(false)
     const isCallOff = ref(false)
     const avatarCall = ref('')
@@ -39,65 +38,89 @@ export default defineComponent({
 
     const myPeer = new Peer()
     const callRefs = ref<{ [key: string]: any }>({})
-    const mediaStream = ref<MediaStream | null>(null)
+    const myMediaStream = ref<MediaStream | null>(null)
 
     const getUserMedia =
-      (navigator as any)?.getUserMedia ||
-      (navigator as any)?.webkitGetUserMedia ||
-      (navigator as any)?.mozGetUserMedia
+      navigator.getUserMedia ||
+      navigator.webkitGetUserMedia ||
+      navigator.mozGetUserMedia
+
+    const getMyMediaStream = async () => {
+      navigator.mediaDevices.enumerateDevices().then((devices) => {
+        const videoExists = devices.some(
+          (device) => device.kind === 'videoinput'
+        )
+        if (videoExists) {
+          getUserMedia(
+            { video: videoExists, audio: true },
+            (mediaStream) => {
+              nextTick(async () => {
+                myVideoRef.value.srcObject = mediaStream
+                if (isTurnOffCamera.value) {
+                  mediaStream.getVideoTracks().forEach((track) => {
+                    track.enabled = false
+                  })
+                }
+                await myVideoRef.value.play()
+              })
+              myMediaStream.value = mediaStream
+            },
+            (err) => {
+              console.log('Failed to get local stream', err)
+            }
+          )
+          return
+        } else {
+          myMediaStream.value = new MediaStream()
+        }
+
+        nextTick(async () => {
+          myVideoRef.value.srcObject = myMediaStream.value
+          await myVideoRef.value.play()
+        })
+      })
+    }
 
     myPeer.on('open', (id) => {
       console.log('My peer id:', id)
-      sendPeerSignal(id, channel_id?.toString() || '')
+      if (isFromMe) {
+        sendPeerSignal(id, channel_id?.toString() || '')
+      }
     })
 
     myPeer.on('call', (call) => {
-      getUserMedia(
-        { video: true, audio: true },
-        (mediaStream) => {
-          myVideoRef.value.srcObject = mediaStream
-          myVideoRef.value.play()
-          call.answer(mediaStream)
-          call.on('stream', function (remoteStream) {
-            nextTick(() => {
-              otherVideoRef.value.srcObject = remoteStream
-              otherVideoRef.value.play()
-            })
-          })
-        },
-        (err) => {
-          console.log('Failed to get local stream', err)
-        }
-      )
+      call.answer(myMediaStream.value)
+      call.on('stream', function (remoteStream) {
+        nextTick(async () => {
+          otherVideoRef.value.srcObject = remoteStream
+          await otherVideoRef.value.play()
+        })
+      })
     })
-
-    const toggleSound = () => {
-      isSoundOff.value = !isSoundOff.value
-    }
 
     const toggleMic = () => {
       isMicOff.value = !isMicOff.value
+      if (isMicOff.value && myMediaStream.value) {
+        myMediaStream.value
+          .getAudioTracks()
+          .forEach((track) => (track.enabled = false))
+      } else {
+        myMediaStream.value
+          .getAudioTracks()
+          .forEach((track) => (track.enabled = true))
+      }
     }
 
     const toggleCamera = () => {
       isTurnOffCamera.value = !isTurnOffCamera.value
-      if (isTurnOffCamera.value && mediaStream.value) {
-        mediaStream.value.getVideoTracks().forEach((track) => track.stop())
+      if (isTurnOffCamera.value && myMediaStream.value) {
+        myMediaStream.value
+          .getVideoTracks()
+          .forEach((track) => (track.enabled = false))
       } else {
-        // Restart the video if the camera is turned on
-        getUserMedia(
-          { video: true, audio: true },
-          (stream) => {
-            mediaStream.value = stream
-            if (myVideoRef.value) {
-              myVideoRef.value.srcObject = mediaStream.value
-              myVideoRef.value.play()
-            }
-          },
-          (err) => {
-            console.log('Failed to get local stream', err)
-          }
-        )
+        myMediaStream.value
+          .getVideoTracks()
+          .forEach((track) => (track.enabled = true))
       }
     }
 
@@ -108,6 +131,7 @@ export default defineComponent({
     }
 
     onMounted(async () => {
+      await getMyMediaStream()
       const ws = await connectToWebsocket()
 
       ws.addEventListener('message', (event) => {
@@ -115,21 +139,18 @@ export default defineComponent({
         if (data.type === 'peer-signal') {
           const { peerId } = data.data
           if (!peerId) return
-          listJoiners.value.push(peerId)
-          getUserMedia(
-            { video: true, audio: true },
-            (mediaStream) => {
-              const call = myPeer.call(peerId, mediaStream)
-              callRefs.value[peerId] = call
-              call.on('stream', function (remoteStream) {
-                otherVideoRef.value.srcObject = remoteStream
-                otherVideoRef.value.play()
-              })
-            },
-            (err) => {
-              console.log('Failed to get local stream', err)
-            }
-          )
+          if (isFromMe === 'true') {
+            return
+          }
+
+          const call = myPeer.call(peerId, myMediaStream.value)
+          callRefs.value[peerId] = call
+          call.on('stream', function (remoteStream) {
+            nextTick(async () => {
+              otherVideoRef.value.srcObject = remoteStream
+              await otherVideoRef.value.play()
+            })
+          })
         } else if (data.type === 'cancel-call') {
           isCallOff.value = true
           myPeer.destroy()
@@ -160,28 +181,6 @@ export default defineComponent({
       })
     })
 
-    // watch(
-    //   [isTurnOffCamera, isMicOff],
-    //   () => {
-    //     navigator.mediaDevices
-    //       .getUserMedia({
-    //         video: !isTurnOffCamera.value,
-    //         audio: !isMicOff.value
-    //       })
-    //       .then((stream) => {
-    //         nextTick(() => {
-    //           if (myVideoRef.value) {
-    //             myVideoRef.value.srcObject = stream
-    //             myVideoRef.value.play()
-    //           }
-    //         })
-    //       })
-    //   },
-    //   {
-    //     immediate: true
-    //   }
-    // )
-
     onBeforeUnmount(() => {
       handleOffCall()
     })
@@ -194,7 +193,6 @@ export default defineComponent({
       currentUser,
       listJoiners,
       isTurnOffCamera,
-      isSoundOff,
       isMicOff,
       isCallOff,
       nameCall,
@@ -202,7 +200,6 @@ export default defineComponent({
       myVideoRef,
       otherVideoRef,
       handleOffCall,
-      toggleSound,
       toggleMic,
       toggleCamera
     }
@@ -216,47 +213,42 @@ export default defineComponent({
   >
     <p class="font-semibold text-2xl">ChatEcho</p>
     <template v-if="!isCallOff">
-      <div
-        v-if="!listJoiners.length"
-        class="grow flex flex-col items-center justify-center gap-5"
-      >
-        <Avatar :image-id="avatarCall" size="xl" />
-        <p>{{ nameCall }}</p>
-        <div class="loader my-3">
-          <div class="circle">
-            <div class="dot"></div>
-            <div class="outline"></div>
-          </div>
-          <div class="circle">
-            <div class="dot"></div>
-            <div class="outline"></div>
-          </div>
-          <div class="circle">
-            <div class="dot"></div>
-            <div class="outline"></div>
-          </div>
-          <div class="circle">
-            <div class="dot"></div>
-            <div class="outline"></div>
-          </div>
-        </div>
-        <p class="text-center text-xl font-light">
-          Waiting for others to join the call
-        </p>
-      </div>
-      <div
-        :class="[
-          'grow w-full grid gap-5 grid-cols-2',
-          listJoiners.length ? '' : 'hidden'
-        ]"
-      >
+      <!--      <div-->
+      <!--        v-if="!listJoiners.length"-->
+      <!--        class="grow flex flex-col items-center justify-center gap-5"-->
+      <!--      >-->
+      <!--        <Avatar :image-id="avatarCall" size="xl" />-->
+      <!--        <p>{{ nameCall }}</p>-->
+      <!--        <div class="loader my-3">-->
+      <!--          <div class="circle">-->
+      <!--            <div class="dot"></div>-->
+      <!--            <div class="outline"></div>-->
+      <!--          </div>-->
+      <!--          <div class="circle">-->
+      <!--            <div class="dot"></div>-->
+      <!--            <div class="outline"></div>-->
+      <!--          </div>-->
+      <!--          <div class="circle">-->
+      <!--            <div class="dot"></div>-->
+      <!--            <div class="outline"></div>-->
+      <!--          </div>-->
+      <!--          <div class="circle">-->
+      <!--            <div class="dot"></div>-->
+      <!--            <div class="outline"></div>-->
+      <!--          </div>-->
+      <!--        </div>-->
+      <!--        <p class="text-center text-xl font-light">-->
+      <!--          Waiting for others to join the call-->
+      <!--        </p>-->
+      <!--      </div>-->
+      <div :class="['grow w-full grid gap-5 grid-cols-2']">
         <div
           class="w-full h-full relative rounded-md bg-stone-900 flex flex-col items-center justify-center"
         >
           <video
             ref="myVideoRef"
-            autoplay
             class="rounded-md w-full h-full object-cover"
+            muted
           ></video>
           <!--          <div v-if="isTurnOffCamera" class="">-->
           <!--            <Avatar :image="currentUser.avatar" size="md" />-->
@@ -289,7 +281,6 @@ export default defineComponent({
         >
           <video
             ref="otherVideoRef"
-            autoplay
             class="rounded-md w-full h-full object-cover"
           ></video>
           <!--          <div v-if="isTurnOffCamera" class="">-->
@@ -324,18 +315,6 @@ export default defineComponent({
         class="fixed right-0 bottom-0 w-full bg-black bg-opacity-30 py-5 flex gap-5 items-center justify-center"
       >
         <div class="flex gap-5 justify-end w-1/3">
-          <Button
-            :class="isSoundOff ? 'bg-primary' : ''"
-            class="rounded-full"
-            size="icon"
-            variant="ghost"
-            @click="toggleSound"
-          >
-            <Icon
-              :icon="isSoundOff ? 'lucide:volume-x' : 'lucide:volume-2'"
-              class="size-5 cursor-pointer"
-            />
-          </Button>
           <Button
             :class="isMicOff ? 'bg-primary' : ''"
             class="rounded-full"

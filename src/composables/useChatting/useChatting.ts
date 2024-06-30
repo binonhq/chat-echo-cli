@@ -68,7 +68,6 @@ export const useChatting: UseChattingReturn = () => {
 
   const handleReceiveMessage = async (event: MessageEvent) => {
     const messageData = JSON.parse(event.data)
-    console.log('get messages', messageData)
     const { type, data } = messageData
     switch (type) {
       case 'online-users':
@@ -171,6 +170,8 @@ export const useChatting: UseChattingReturn = () => {
 
   const handleJoinCall = async (data: any) => {
     const { channelId, option } = data
+    const isFromMe =
+      callRequest.value?.from._id === store.state.user.currentUser.userId
     if (!channelId || !option) {
       toast({
         title: 'Error',
@@ -179,7 +180,10 @@ export const useChatting: UseChattingReturn = () => {
       return
     }
     await store.dispatch(Types.SET_IN_CALL, true)
-    window.open(`/call?channel_id=${channelId}&option=${option}`, '_blank')
+    window.open(
+      `/call?channel_id=${channelId}&option=${option}&isFromMe=${isFromMe}`,
+      '_blank'
+    )
   }
 
   const handleSelectChannel = async (channel: Channel) => {

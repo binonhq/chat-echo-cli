@@ -29,7 +29,6 @@ export default defineComponent({
             if (audioRef.value?.paused) {
               audioRef.value.currentTime = 0
             }
-            audioRef.value?.play()
           })
           if (callRequest.from._id === currentUser.value?.userId) {
             setTimeout(() => {
