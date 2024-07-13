@@ -5,6 +5,7 @@ import { useAuth } from '@/composables/useAuth'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/utils.ts'
 import { Separator } from '@/components/ui/separator'
+import { useChatting } from '@/composables/useChatting/useChatting.ts'
 
 export default defineComponent({
   name: 'SideBar',
@@ -14,6 +15,7 @@ export default defineComponent({
     const route = useRoute()
     const router = useRouter()
     const { logout } = useAuth()
+    const { closeWebsocket } = useChatting()
 
     const path = computed(() => route.path.split('/')[1])
     const isCollapsed = ref(true)
@@ -76,6 +78,7 @@ export default defineComponent({
         path: 'logout',
         function: () => {
           logout()
+          closeWebsocket()
         }
       }
     ])

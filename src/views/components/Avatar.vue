@@ -104,7 +104,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div :class="sizeAvatar.avatar" class="relative">
+  <div :class="sizeAvatar.avatar" class="flex relative">
     <ImagePreview
       v-if="imageId && canPreview"
       :src="avatarSrc"

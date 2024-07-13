@@ -123,6 +123,8 @@ export default defineComponent({
               })
               return
             }
+            audioFiles.value.pop()
+            audios.value.pop()
             audioFiles.value.push(newFile)
             audios.value.push(URL.createObjectURL(newFile))
           }
@@ -139,6 +141,8 @@ export default defineComponent({
         })
         return
       }
+      audioFiles.value.pop()
+      audios.value.pop()
       audioFiles.value.push(e.target.files[0])
       audios.value.push(URL.createObjectURL(e.target.files[0]))
     }

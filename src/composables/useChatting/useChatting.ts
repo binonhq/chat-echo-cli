@@ -66,6 +66,12 @@ export const useChatting: UseChattingReturn = () => {
     return ws
   }
 
+  const closeWebsocket = () => {
+    webSocketInstance.value.close()
+    store.dispatch(Types.SET_WEB_SOCKET, null)
+    console.log('Websocket closed')
+  }
+
   const handleReceiveMessage = async (event: MessageEvent) => {
     const messageData = JSON.parse(event.data)
     const { type, data } = messageData
@@ -384,6 +390,7 @@ export const useChatting: UseChattingReturn = () => {
     acceptJoinCall,
     sendPeerSignal,
     getDetailChannel,
-    getUserById
+    getUserById,
+    closeWebsocket
   }
 }

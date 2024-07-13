@@ -8,6 +8,7 @@ import { mainAxios } from '@/main.ts'
 import { toast } from '@/components/ui/toast'
 import EditGroup from '@/views/components/EditGroup.vue'
 import ImagePreview from '@/views/components/ImagePreview.vue'
+import { useAuth } from '@/composables/useAuth'
 
 export default defineComponent({
   name: 'ChatInformation',
@@ -15,6 +16,7 @@ export default defineComponent({
   setup(_props, { emit }) {
     const { getDetailChannel, currentChannelId, getDetailMessages } =
       useChatting()
+    const { currentUser } = useAuth()
     const detailChannel = ref({} as ChannelDetail)
 
     const toggleHideChatInformation = () => {
@@ -55,6 +57,7 @@ export default defineComponent({
 
     return {
       detailChannel,
+      currentUser,
       toggleHideChatInformation,
       handleDeleteChat,
       handleOpenAttachment
@@ -75,8 +78,23 @@ export default defineComponent({
     </div>
     <Avatar :image-id="detailChannel.avatarId" :type="detailChannel.type" />
     <div>
-      <p class="text-center text-2xl font-medium">{{ detailChannel.name }}</p>
-      <p v-if="detailChannel.type === 'group'" class="text-sm text-gray-500">
+      <router-link
+        v-if="detailChannel.type === 'direct'"
+        :to="
+          '/community/' +
+          detailChannel.userIds.find((user) => user._id !== currentUser.userId)
+            ._id
+        "
+        class="text-center text-2xl font-medium"
+        >{{ detailChannel.name }}
+      </router-link>
+      <p v-else class="text-center text-2xl font-medium">
+        {{ detailChannel.name }}
+      </p>
+      <p
+        v-if="detailChannel.type === 'group'"
+        class="text-sm text-gray-500 text-center"
+      >
         {{ detailChannel.userIds.length }} members
       </p>
     </div>
@@ -127,7 +145,7 @@ export default defineComponent({
     </template>
 
     <Separator class="w-full" />
-    <div class="flex gap-2 w-full">
+    <div class="flex gap-2 w-full mt-auto">
       <EditGroup
         v-if="detailChannel.type === 'group'"
         :group-info="detailChannel"

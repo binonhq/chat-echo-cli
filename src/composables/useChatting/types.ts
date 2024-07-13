@@ -26,6 +26,7 @@ export interface UseChatting {
   acceptJoinCall: () => void
   conversation: ComputedRef<Message[]>
   historyChat: ComputedRef<any>
+  closeWebsocket: () => void
 }
 
 export type UseChattingReturn = () => UseChatting
