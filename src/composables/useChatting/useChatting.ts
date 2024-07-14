@@ -12,6 +12,7 @@ import { toast } from '@/components/ui/toast'
 import { useRoute, useRouter } from 'vue-router'
 
 export const useChatting: UseChattingReturn = () => {
+  const nodeServer = import.meta.env.VITE_NODE_SERVER
   const host = import.meta.env.VITE_NODE_HOST
   const port = import.meta.env.VITE_NODE_PORT
   const store = useStore()
@@ -49,7 +50,12 @@ export const useChatting: UseChattingReturn = () => {
   }
 
   const connectToWebsocket: ConnectToWebsocket = async () => {
-    const url = `ws://${host}:${port}?token=${getToken().accessToken}`
+    // if host is https then use wss
+    let url = `ws://${host}:${port}?token=${getToken().accessToken}`
+    if (nodeServer.includes('https')) {
+      url = `wss://${host}:${port}?token=${getToken().accessToken}`
+    }
+
     const ws = new WebSocket(url)
 
     ws.onopen = () => {

@@ -72,6 +72,7 @@ app.component('TextArea', Textarea)
 // axios.defaults.baseURL = 'http://localhost:8000'
 axios.defaults.withCredentials = false
 axios.defaults.headers.common['Authorization'] = getToken()?.accessToken
+axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 
 export const mainAxios = axios.create({
   baseURL: import.meta.env.VITE_NODE_SERVER || 'http://localhost:8080'
